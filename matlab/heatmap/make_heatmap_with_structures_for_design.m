@@ -1,13 +1,13 @@
-function make_heatmap_with_mfe_structures_for_design( idx, r_norm, mfe_structure_map, mfe_structures,mfe_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags, create_figure_window );
-% make_heatmap_with_mfe_structures_for_design( idx, r_norm, mfe_structure_map, mfe_structures,mfe_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags );
+function make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets,structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags, create_figure_window );
+% make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets,structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags );
 %
 % Inputs
 %  idx = [integer] index of design for which to show heatmap
 %  r_norm = [Ndesign x Nres x Nconditions] Reactivity matrix, normalized.
-%  mfe_structure_map = [Ndesign x Nres x Npackages] 0/1 map
+%  structure_map = [Ndesign x Nres x Npackages] 0/1 map
 %            of paired/unpaired for each predicted structure
-%  mfe_structures = [Npackages x Ndesign] cell of cell of strings of predicted structures
-%  mfe_tags = cell of string, name of each package
+%  structure_sets = [Npackages x Ndesign] cell of cell of strings of predicted structures
+%  structure_tags = cell of string, name of each package
 %  pkg_sort_idx = permutation of packages (e.g., [2, 4, 1, 3]) to order
 %             packages
 %  headers = cell of Ndesign strings describing each design (titles for
@@ -32,25 +32,25 @@ labels = [labels,tags];
 Ndata = size(r_norm,3);
 
 if isempty(pkg_sort_idx)
-    %[all_corr_coef, pkg_sort_idx] = get_corr_coeff( mean(r_norm,3), mfe_structure_map, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5);
-    for n = 1:size(mfe_structure_map,3);
-        eterna_scores(n) = calc_eterna_score_classic( mean(r_norm(idx,:,:),3), squeeze(mfe_structure_map(idx,:,n)), BLANK_OUT5, BLANK_OUT3);
+    %[all_corr_coef, pkg_sort_idx] = get_corr_coeff( mean(r_norm,3), structure_map, idx, structure_tags, BLANK_OUT3, BLANK_OUT5);
+    for n = 1:size(structure_map,3);
+        eterna_scores(n) = calc_eterna_score_classic( mean(r_norm(idx,:,:),3), squeeze(structure_map(idx,:,n)), BLANK_OUT5, BLANK_OUT3);
     end
     [~,pkg_sort_idx] = sort(eterna_scores);
 end
 
 best_structure = '';
-best_fit_idx = find( contains( mfe_tags, 'best_fit' ) );
+best_fit_idx = find( contains( structure_tags, 'best_fit' ) );
 [~,sortidx] = sort(-pkg_sort_idx(best_fit_idx));
-if ~isempty(sortidx); best_structure = mfe_structures{ best_fit_idx(sortidx(1)) }{idx}; end;
+if ~isempty(sortidx); best_structure = structure_sets{ best_fit_idx(sortidx(1)) }{idx}; end;
 
 show_structures=repmat({''},1,Ndata);
 for n = pkg_sort_idx(end:-1:1)
-    d = [d; 0.4*mfe_structure_map(idx,:,n)];
-    show_structures = [show_structures,mfe_structures{n}{idx}];
+    d = [d; 0.4*structure_map(idx,:,n)];
+    show_structures = [show_structures,structure_sets{n}{idx}];
 
-    mfe_tag = mfe_tags{n};
-    if length(best_structure) > 0 & strcmp(best_structure,mfe_structures{n}{idx}); mfe_tag = ['*** ',mfe_tag]; end;
+    mfe_tag = structure_tags{n};
+    if length(best_structure) > 0 & strcmp(best_structure,structure_sets{n}{idx}); mfe_tag = ['*** ',mfe_tag]; end;
     labels = [labels,mfe_tag];
 end
 imagesc(d,[-2 2]);

@@ -1,10 +1,10 @@
-function [openknot_info_structs,structures,openknot_scores,eterna_scores,crossed_pair_scores,crossed_pair_quality_scores,cc] = calc_openknot_scores( r_norm, mfe_structures, good_idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers);
-% [openknot_info_structs,openknot_scores,eterna_scores,crossed_pair_scores,crossed_pair_quality_scores,structures,cc] = calc_openknot_scores( r_norm, mfe_structures, good_idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers);
+function [openknot_info_structs,structures,openknot_scores,eterna_scores,crossed_pair_scores,crossed_pair_quality_scores,cc] = calc_openknot_scores( r_norm, structure_sets, good_idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers);
+% [openknot_info_structs,openknot_scores,eterna_scores,crossed_pair_scores,crossed_pair_quality_scores,structures,cc] = calc_openknot_scores( r_norm, structure_sets, good_idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers);
 %
 % Inputs:
 %  r_norm = [Ndesign x Nres] Reactivity matrix, normalized.
 %               normalized to go from 0 to 1 (~90th percentile)
-%  mfe_structures = [Npackages x Ndesign] cell of cell of strings of predicted structures
+%  structure_sets = [Npackages x Ndesign] cell of cell of strings of predicted structures
 %  good_idx = [Nidx] index of designs for which to show heatmap
 %  mfe_tags = cell of string, name of each package
 %  BLANK_OUT5 = gray out this number of 5' residues
@@ -45,39 +45,38 @@ crossed_pair_quality_scores = [];
 openknot_info_structs = {};
 
 for idx = good_idx'
-    openknot_info_struct = calc_openknot_score( r_norm, mfe_structures, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers );
+    openknot_info_struct = calc_openknot_score( r_norm, structure_sets, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers );
 
     openknot_info_structs = [openknot_info_structs, openknot_info_struct];
 
-    structures = [structures, {openknot_info_struct.best_structs{1}}];
-    openknot_scores = [openknot_scores, openknot_info_struct.openknot_score];
-    eterna_scores = [eterna_scores, openknot_info_struct.eterna_classic_score];
-    crossed_pair_scores = [crossed_pair_scores, openknot_info_struct.crossed_pair_score];
-    crossed_pair_quality_scores = [crossed_pair_quality_scores, openknot_info_struct.crossed_pair_quality_score];
-    cc = [cc, openknot_info_struct.best_cc];
+    structures = [structures, {openknot_info_struct.best_fit.structures{1}}];
+    openknot_scores = [openknot_scores, openknot_info_struct.score.openknot_score];
+    eterna_scores = [eterna_scores, openknot_info_struct.score.eterna_classic_score];
+    crossed_pair_scores = [crossed_pair_scores, openknot_info_struct.score.crossed_pair_score];
+    crossed_pair_quality_scores = [crossed_pair_quality_scores, openknot_info_struct.score.crossed_pair_quality_score];
+    cc = [cc, openknot_info_struct.score.best_cc];
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [openknot_info_struct] = calc_openknot_score( r_norm, mfe_structures, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers )
+function [openknot_info_struct] = calc_openknot_score( r_norm, structure_sets, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers )
 
 data = r_norm(idx,:,1);
 
 % remove singlet base pairs
 for n = 1:length(mfe_tags)
-    structure = mfe_structures{n}{idx};
-    mfe_structures{n}{idx} = sanitize_structure( structure, 1);
+    structure = structure_sets{n}{idx};
+    structure_sets{n}{idx} = sanitize_structure( strrep(structure,'x','.'), 1);
 end
-mfe_structure_map = get_mfe_structure_map( mfe_structures, idx );
+structure_map = get_structure_map( structure_sets, idx );
 
-
-[cc,cc_sort_idx] = get_corr_coeff( r_norm, mfe_structure_map, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5);
+[cc,cc_sort_idx] = get_corr_coeff( r_norm, structure_map, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5);
 
 % eterna score classic:
 for n = 1:length(mfe_tags)
-    pred = squeeze(mfe_structure_map(idx,:,n));
+    pred = squeeze(structure_map(idx,:,n));
     eterna_classic_scores(n) = calc_eterna_score_classic( data, pred, BLANK_OUT5, BLANK_OUT3);
-    [crossed_pair_scores(n),crossed_pair_quality_scores(n)] = calc_crossed_pair_score(data, mfe_structures{n}{idx}, BLANK_OUT5, BLANK_OUT3 );
+    [crossed_pair_scores(n),crossed_pair_quality_scores(n)] = calc_crossed_pair_score(data, structure_sets{n}{idx}, BLANK_OUT5, BLANK_OUT3 );
 end
 plot( cc, eterna_classic_scores,'.')
 xlabel('Correlation coefficient');
@@ -100,7 +99,7 @@ best_model_idx = find( eterna_classic_score == eterna_classic_scores);
 crossed_pair_score = max(crossed_pair_scores(best_model_idx));
 best_model_idx = find( eterna_classic_score == eterna_classic_scores & crossed_pair_scores == crossed_pair_score);
 
-structure = mfe_structures{best_model_idx(1)}{idx};
+structure = structure_sets{best_model_idx(1)}{idx};
 best_cc = cc(best_model_idx(1));
 
 % try ensembling any models that are close, based on correlation
@@ -126,8 +125,8 @@ best_struct_eterna_scores = eterna_classic_scores( best_model_idx );
 best_structs = {};
 best_struct_tags = {};
 for n = best_model_idx;
-    fprintf( '%30s %s\n',mfe_tags{n},mfe_structures{n}{idx});
-    best_structs = [best_structs,{mfe_structures{n}{idx}}];
+    fprintf( '%30s %s\n',mfe_tags{n},structure_sets{n}{idx});
+    best_structs = [best_structs,{structure_sets{n}{idx}}];
     best_struct_tags = [best_struct_tags,{mfe_tags{n}}];
 end
 
@@ -139,14 +138,16 @@ fprintf( '\nBest model for %s.  OpenKnot: %5.2f Eterna classic: %5.2f  Crossed p
     best_cc);
 
 openknot_info_struct = struct();
-openknot_info_struct.openknot_score = openknot_score;
-openknot_info_struct.eterna_classic_score = eterna_classic_score;
-openknot_info_struct.crossed_pair_score = crossed_pair_score;
-openknot_info_struct.crossed_pair_quality_score = crossed_pair_quality_score;
-openknot_info_struct.best_cc = best_cc;
-openknot_info_struct.best_struct_tags = best_struct_tags;
-openknot_info_struct.best_structs = best_structs;
-openknot_info_struct.best_struct_eterna_scores = best_struct_eterna_scores;
+openknot_info_struct.score = struct();
+openknot_info_struct.score.openknot_score = openknot_score;
+openknot_info_struct.score.eterna_classic_score = eterna_classic_score;
+openknot_info_struct.score.crossed_pair_score = crossed_pair_score;
+openknot_info_struct.score.crossed_pair_quality_score = crossed_pair_quality_score;
+openknot_info_struct.score.best_cc = best_cc;
+openknot_info_struct.best_fit = struct();
+openknot_info_struct.best_fit.tags = best_struct_tags;
+openknot_info_struct.best_fit.structures = best_structs;
+openknot_info_struct.best_fit.eterna_classic_scores = best_struct_eterna_scores;
 
 
 

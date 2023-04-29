@@ -20,6 +20,10 @@ function [crossed_pair_score, crossed_pair_quality_score] = calc_crossed_pair_sc
 
 threshold_SHAPE_fixed_pair = 0.25;
 
+crossed_pair_score = 0;
+crossed_pair_quality_score = 0;
+if all(structure=='x'); return; end;
+
 % get base pairs
 bps = convert_structure_to_bps2(structure);
 
