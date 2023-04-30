@@ -12,8 +12,11 @@ function output_heatmaps_with_structures_for_design( image_dir, good_idx, r_norm
 %  pkg_sort_idx = permutation of packages (e.g., [2, 4, 1, 3]) to order
 %             packages
 %  headers = cell of Ndesign strings describing each design (titles for
-%  plot)
+%  plot). Provide [] to auto-fill from ids,titles,authors.
 %  sequences = cell of sequences for Ndesigns
+%  ids = [Ndesign integers] ids
+%  titles  = {cell of Ndesign strings} design titles.
+%  authors = {cell of Ndesign strings} authors
 %  BLANK_OUT5 = gray out this number of 5' residues
 %  BLANK_OUT3 = gray out this number of 3' residues 
 %  tags = strings that provide experimental names for each of the
@@ -23,10 +26,16 @@ function output_heatmaps_with_structures_for_design( image_dir, good_idx, r_norm
 % 
 if ~exist(image_dir,'dir') mkdir( image_dir ); end;
 if ~exist('tags','var') tags = {'SHAPE, no Mg2+','SHAPE, +Mg2+'}; end
-set(figure(5),'position',[200 500 1200 400]);
+set(figure(5),'position',[100 500 1200 100+12*length(structure_sets)]);
 set(gcf,'color','white')
 clf
 
+if isempty(headers)==0
+    for i = 1:length(ids)
+        headers{i} = sprintf('%d\t%s\t%s',ids(i),titles{i},authors{i});
+    end
+end
+    
 for n = 1:length(good_idx)
     idx = good_idx(n);
     make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets, structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags, 0 );

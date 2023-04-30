@@ -25,7 +25,7 @@ crossed_pair_quality_score = 0;
 if all(structure=='x'); return; end;
 
 % get base pairs
-bps = convert_structure_to_bps2(structure);
+bps = convert_structure_to_bps_v2(structure);
 
 % singlets are throwing things off.
 bps = remove_singlet_bps( bps );

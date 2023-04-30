@@ -16,9 +16,10 @@ function [x,structure_tags, structure_sets,structure_map] = read_structure_sets_
 %               paired/unpaired in each package structure prediction
 %
 % (C) R. Das, HHMI/Stanford University 2023.
-
+warning('off');
 x = readtable(structure_sets_csv_file);
 structure_tags = {}; structure_sets = {}; count = 0;
+fprintf('\n');
 for n = 1:length(x.Properties.VariableNames);
     tag = x.Properties.VariableNames{n};
     structures = table2cell(x(:,n));
@@ -39,7 +40,7 @@ for n = 1:length(x.Properties.VariableNames);
         structure_sets{count}{i} = sanitize_structure( structure_sets{count}{i} );
     end
 end
-
+fprintf('\n');
 
 % may need to do a reordering if sequence order in structure file does not
 % match sequences 
@@ -58,6 +59,7 @@ if exist('ordered_sequences','var') & length( ordered_sequences ) > 0
     for n = 1:length(structure_sets)
         structure_sets{n} = structure_sets{n}(reorder);
     end
+    fprintf( 'Matched to %d ordered sequences\n',length(reorder))
 end
 
 structure_map = get_structure_map( structure_sets );
