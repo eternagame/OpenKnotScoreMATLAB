@@ -119,7 +119,8 @@ best_model_idx = best_model_idx( sortidx(end:-1:1) );
 eterna_classic_score = mean( eterna_classic_scores( best_model_idx) );
 crossed_pair_score   = mean( crossed_pair_scores( best_model_idx) );
 crossed_pair_quality_score   = mean( crossed_pair_quality_scores( best_model_idx) );
-openknot_score = 0.5 * ( eterna_classic_score + crossed_pair_score );
+% openknot_score = 0.5 * ( eterna_classic_score + crossed_pair_score );
+openknot_score = 0.5 * ( eterna_classic_score + crossed_pair_quality_score );
 best_struct_eterna_scores = eterna_classic_scores( best_model_idx );
 
 best_structs = {};
