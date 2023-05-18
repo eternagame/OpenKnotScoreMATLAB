@@ -30,7 +30,7 @@ set(figure(5),'position',[100 500 1200 100+12*length(structure_sets)]);
 set(gcf,'color','white')
 clf
 
-if isempty(headers)==0
+if isempty(headers)
     for i = 1:length(ids)
         headers{i} = sprintf('%d\t%s\t%s',ids(i),titles{i},authors{i});
     end
