@@ -32,9 +32,10 @@ labels = [labels,tags];
 Ndata = size(r_norm,3);
 
 if isempty(pkg_sort_idx)
-    %[all_corr_coef, pkg_sort_idx] = get_corr_coeff( mean(r_norm,3), structure_map, idx, structure_tags, BLANK_OUT3, BLANK_OUT5);
+    r_norm_for_scoring = r_norm(idx,:,1); % just use first data set
+    % r_norm_for_scoring = mean(r_norm(idx,:,:),3)
     for n = 1:size(structure_map,3);
-        eterna_scores(n) = calc_eterna_score_classic( mean(r_norm(idx,:,:),3), squeeze(structure_map(idx,:,n)), BLANK_OUT5, BLANK_OUT3);
+        eterna_scores(n) = calc_eterna_score_classic( r_norm_for_scoring, squeeze(structure_map(idx,:,n)), BLANK_OUT5, BLANK_OUT3);
     end
     [~,pkg_sort_idx] = sort(eterna_scores);
 end
@@ -72,8 +73,23 @@ end
 
 N = size(d,2);
 % gray out regions where there shouldn't be data.
-rectangle('Position',[0 0.5 BLANK_OUT5+0.5 Ndata],'EdgeColor','none','FaceColor',[0.5 0.5 0.5]);
+% gray out flanking regions where primers bind
+rectangle('Position',[0 0.5 BLANK_OUT5+0.5 Ndata],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
 rectangle('Position',[N-BLANK_OUT3+0.5 0.5 BLANK_OUT3+0.5 Ndata],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
+% gray out profiles for which we are missing data (signaled by nan)
+nan_profile_idx = find(isnan(d(:,BLANK_OUT5+1)));
+for i = nan_profile_idx'
+    rectangle('Position',[0 i-0.5 N+0.5 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
+end
+% gray out G and U for DMS data, since DMS mainly hits A and C?
+for i = find(contains(tags,'DMS'))
+    gu_idx = union( strfind(sequence,'G'), strfind(sequence,'U') );
+    for k = gu_idx
+        rectangle('Position',[k-0.5 i-0.5 1 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
+    end
+end
+
+% Axis labels
 xlabel( 'Position');
 h=title(headers(idx));
 set(h,'interpreter','none')

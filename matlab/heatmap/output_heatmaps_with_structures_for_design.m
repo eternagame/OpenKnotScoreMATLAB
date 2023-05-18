@@ -35,7 +35,7 @@ if isempty(headers)==0
         headers{i} = sprintf('%d\t%s\t%s',ids(i),titles{i},authors{i});
     end
 end
-    
+
 for n = 1:length(good_idx)
     idx = good_idx(n);
     make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets, structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags, 0 );
