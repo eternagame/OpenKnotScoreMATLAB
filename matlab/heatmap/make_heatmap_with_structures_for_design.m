@@ -29,6 +29,7 @@ if ~exist('create_figure_window','var') create_figure_window = 1; end
 labels = {'sequence'};
 reverse_profile_order = [size(r_norm,3):-1:1];
 d = shiftdim(r_norm(idx,:,reverse_profile_order),1)';
+tags{1} = ['*',tags{1}];
 labels = [labels,tags(reverse_profile_order)];
 Ndata = size(r_norm,3);
 
@@ -55,7 +56,10 @@ for n = pkg_sort_idx(end:-1:1)
     show_structures = [show_structures,structure_sets{n}{idx}];
 
     mfe_tag = structure_tags{n};
-    if length(best_structure) > 0 & strcmp(best_structure,structure_sets{n}{idx}); mfe_tag = ['*** ',mfe_tag]; end;
+    if length(best_structure) > 0 & strcmp(best_structure,structure_sets{n}{idx}); mfe_tag = ['*** ',mfe_tag]; 
+    elseif exist('eterna_scores','var') & eterna_scores(n) > eterna_scores(pkg_sort_idx(end)) - 5;
+        mfe_tag = ['*',mfe_tag]; 
+    end
     labels = [labels,mfe_tag];
 end
 imagesc(d,[-2 2]);
