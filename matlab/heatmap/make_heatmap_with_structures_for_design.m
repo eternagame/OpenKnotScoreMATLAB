@@ -27,8 +27,9 @@ if ~exist('tags','var') tags = {'SHAPE, no Mg2+','SHAPE, +Mg2+'}; end
 if ~exist('create_figure_window','var') create_figure_window = 1; end
 
 labels = {'sequence'};
-d = shiftdim(r_norm(idx,:,:),1)';
-labels = [labels,tags];
+reverse_profile_order = [size(r_norm,3):-1:1];
+d = shiftdim(r_norm(idx,:,reverse_profile_order),1)';
+labels = [labels,tags(reverse_profile_order)];
 Ndata = size(r_norm,3);
 
 if isempty(pkg_sort_idx)
@@ -38,6 +39,9 @@ if isempty(pkg_sort_idx)
         eterna_scores(n) = calc_eterna_score_classic( r_norm_for_scoring, squeeze(structure_map(idx,:,n)), BLANK_OUT5, BLANK_OUT3);
     end
     [~,pkg_sort_idx] = sort(eterna_scores);
+    for n = 1:size(structure_map,3);
+        structure_tags{n} = sprintf( '%s EternaClassic %5.1f', structure_tags{n}, eterna_scores(n) );
+    end
 end
 
 best_structure = '';
@@ -68,7 +72,7 @@ end
 
 sequence = sequences{idx};
 for n = 1:length(sequence)
-    text(n,0,sequence(n),'interpreter','none','HorizontalAlignment','center','VerticalAlignment','middle');
+    text(n,0,sequence(n),'interpreter','none','HorizontalAlignment','center','VerticalAlignment','middle','fontsize',8);
 end
 
 N = size(d,2);
@@ -79,13 +83,13 @@ rectangle('Position',[N-BLANK_OUT3+0.5 0.5 BLANK_OUT3+0.5 Ndata],'EdgeColor','no
 % gray out profiles for which we are missing data (signaled by nan)
 nan_profile_idx = find(isnan(d(:,BLANK_OUT5+1)));
 for i = nan_profile_idx'
-    rectangle('Position',[0 i-0.5 N+0.5 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
+    rectangle('Position',[0 reverse_profile_order(i)-0.5 N+0.5 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
 end
 % gray out G and U for DMS data, since DMS mainly hits A and C?
 for i = find(contains(tags,'DMS'))
     gu_idx = union( strfind(sequence,'G'), strfind(sequence,'U') );
     for k = gu_idx
-        rectangle('Position',[k-0.5 i-0.5 1 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
+        rectangle('Position',[k-0.5 reverse_profile_order(i)-0.5 1 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
     end
 end
 
