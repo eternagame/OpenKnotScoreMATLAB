@@ -87,7 +87,7 @@ rectangle('Position',[N-BLANK_OUT3+0.5 0.5 BLANK_OUT3+0.5 Ndata],'EdgeColor','no
 % gray out profiles for which we are missing data (signaled by nan)
 nan_profile_idx = find(isnan(d(:,BLANK_OUT5+1)));
 for i = nan_profile_idx'
-    rectangle('Position',[0 reverse_profile_order(i)-0.5 N+0.5 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
+    rectangle('Position',[0 i-0.5 N+0.5 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
 end
 % gray out G and U for DMS data, since DMS mainly hits A and C?
 for i = find(contains(tags,'DMS'))
