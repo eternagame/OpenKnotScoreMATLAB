@@ -1,5 +1,5 @@
-function [x,structure_tags, structure_sets,structure_map] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences )
-% [x,structure_tags, structure_sets,structure_map] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences );
+function [x,structure_tags, structure_sets,structure_map] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences, sanitize_structures )
+% [x,structure_tags, structure_sets,structure_map] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences, sanitize_structures );
 %
 % Inputs
 %  structure_sets_csv_file = csv file with columns like "_mfe" holding
@@ -7,6 +7,7 @@ function [x,structure_tags, structure_sets,structure_map] = read_structure_sets_
 %  ordered_sequences = [Optional] list of sequences. If provided, structures read
 %          in from .csv file will be reordered based on sequence column to match ordering in
 %          ordered_sequence
+%  sanitize_structures = sanitize dot-bracket structure (Default 1)
 %
 % Outputs
 % x = csv file in MATLAB Table object
@@ -17,6 +18,7 @@ function [x,structure_tags, structure_sets,structure_map] = read_structure_sets_
 %
 % (C) R. Das, HHMI/Stanford University 2023.
 warning('off');
+if ~exist('sanitize_structures','var') sanitize_structures = 1; end;
 x = readtable(structure_sets_csv_file);
 structure_tags = {}; structure_sets = {}; count = 0;
 fprintf('\n');
@@ -27,17 +29,21 @@ for n = 1:length(x.Properties.VariableNames);
     if contains(tag,'sequence'); continue; end;
     is_structure_col = 1;
     for i = 1:size(x,1) 
-        if ~ischar(structures{i}) | (~contains(structures{i},'.') & ~contains(structures{i},'(') & ~contains(structures{i},'x'))
+        if strcmp(structures{i},'ERR'); structures{i}=repmat('.',1,length(structures{1})); end;
+        if ~ischar(structures{i}) | (~contains(structures{i},'.') & ~contains(structures{i},'(') & ~contains(structures{i},'x') )
             is_structure_col = 0;
+            break;
         end
     end
     if ~is_structure_col; continue; end;
     count = count + 1;
     structure_tags{count} = strrep(strrep(tag,'__mfe',''),'_mfe','');
     structure_sets{count} = structures;
-    fprintf( 'Sanitizing %d structures for %s...\n',size(x,1),structure_tags{count});
-    for i = 1:size(x,1) % loop over designs
-        structure_sets{count}{i} = sanitize_structure( structure_sets{count}{i} );
+    if sanitize_structures
+        fprintf( 'Sanitizing %d structures for %s...\n',size(x,1),structure_tags{count});
+        for i = 1:size(x,1) % loop over designs
+            structure_sets{count}{i} = sanitize_structure( structure_sets{count}{i} );
+        end
     end
 end
 fprintf('\n');
