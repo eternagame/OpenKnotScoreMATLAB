@@ -21,7 +21,7 @@ bps = get_bps( structure, bps, '{', '}' );
 bps = get_bps( structure, bps, '<', '>' );
 
 % allow any other chars to represent additional base pairs
-other_chars = setdiff( structure, '()[]{}<>.' );
+other_chars = setdiff( structure, '()[]{}<>.-:_,~' );
 for n = 1:length( other_chars )
     pos = find( structure == other_chars(n) );
     if mod(length(pos),2) ~= 0
@@ -32,11 +32,11 @@ for n = 1:length( other_chars )
     N = length(pos)/2;
     i = pos(1 : N); % first N
     j = pos(2*N: -1: (N+1) ); % last N are assumed to be pairs
-    if ( N > 1 ) % each of the two sets of characters must be contiguous
-        if ~all( i(1:end-1)+1 == i(2:end) ) | ~all( j(1:end-1)-1 == j(2:end) )
-            fprintf( 'Non-contiguous stem from character %s in structure! %s\n',other_chars(n),structure )
-        end
-    end
+%     if ( N > 1 ) % each of the two sets of characters must be contiguous
+%         if ~all( i(1:end-1)+1 == i(2:end) ) | ~all( j(1:end-1)-1 == j(2:end) )
+%             fprintf( 'Non-contiguous stem from character %s in structure! %s\n',other_chars(n),structure )
+%         end
+%     end
     bps = [bps; i' j' ];
 end
 
