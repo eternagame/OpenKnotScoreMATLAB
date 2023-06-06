@@ -49,6 +49,7 @@ end
 %subplot(1,Nplots, Nplots)
 axes('Position',[0.3+Nconditions*plot_width 0.1 plot_width 0.8])
 %axes('Position',[0.72 0.1 0.2 0.8])
+if isempty(structure_map); structure_map = 0*r_norm; end;
 structure_map(:,1:BLANK_OUT5) = 0;
 structure_map(:,end-BLANK_OUT3+1:end) = 0;
 imagesc(0.02*structure_map(good_idx,:),[-0.05 0.05])
