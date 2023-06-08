@@ -1,17 +1,44 @@
 # OpenKnotScore
 Scripts and examples for scoring pseudoknot designs based on chemical mapping data.
 
-Developed for the Eterna project's [OpenKnot challenge](https://eternagame.org/challenges/11843006) by R. Das, with significant input from Rachael Kretsch, Grace Nye, Thomas Karagianes, Rui Huang, Jill Townley, Jonathan Romano, and the Eterna developer team.
+Developed for the Eterna project's [OpenKnot challenge](https://eternagame.org/challenges/11843006) by R. Das.
+
+Thanks to Rachael Kretsch, Grace Nye, Thomas Karagianes, Rui Huang, Jill Townley, Jonathan Romano, and the Eterna developer team for comments, data, and preliminary work.
 
 
 ## Principle behind the Score
 
+The OpenKnot score was developed to provide a metric to Eterna Players to aid discovery of pseudoknots in the OpenKnot challenge based on SHAPE data. It goes from 0 to 100, with higher values more likely to be pseudoknots. 
+
+A score above is 80 is estimated to have a pretty good chance for being a pseudoknot. RNA with score below 80 may also form pseudoknots -- its just that the SHAPE data cannot distinguish.
+ 
+The OpenKnot score is the average of the 'Eterna Classic Score' and the 'Crossed Pair Quality score' for the design, given the SHAPE data and a modeled secondary structure:
+
+```
+OpenKnot score = 1/2 (Eterna Classic Score + Crossed Pair Quality score)
+```
+
+1. The Eterna Classic score looks at all SHAPE probed positions. If the position is predicted to be paired but has SHAPE reactivity above 0.5, then it is penalized (red symbol below). If the position is predicted to be unnpaired but has SHAPE reactivity below 0.125, then it is penalized (orange symbol below). 
+
+![t5_from_2TPK_visualize_eterna_classic_score.png](example/example_output/t5_from_2TPK_visualize_eterna_classic_score.png)
+
+In this example, there are 69 positions with SHAPE data, and 64 are good, so the Eterna Classic score is 64/69 = 92.8. This type of scoring scheme was developed for Eterna's first paper and archived in this repository. Previously, an extra optimization step was implemented to rescale and offset the data to help maximize ETerna Classic score; this was important for data derived from capillary electrophoresis measurements on each RNA one by one, where those parameters were quite uncertain, but with improved experimental measurements based on, e.g., mutational profiling on lots of sequences at once, that kind of offseting/rescaling is obviated. The SHAPE data is assumed to be normalized so that the 90th percentile value seen in the data set is set to 1.0.
+
+2. The second component of the Open Knot score is the Crossed Pair Quality subscore. This  is the same as the Eterna Classic score, but only computed over residues involved in predicted base pairs that 'cross' other base pairs. Note that these are more than just the `[` and `]` residues in the structure -- these also include the pairs that those pairs cross. Example are the nucleotides marked with symbols below:
+
+![t5_from_2TPK_visualize_crossed_pair_quality_score.png](example/example_output/t5_from_2TPK_visualize_crossed_pair_quality_score.png)
+
+In this example, there are 24 residues involved in crossed pairs, and 22 have SHAPE values under 0.5, which counts as 'good'. So the Crossed Pair Quality score is 22/24 = 91.7. [Minor point for experts: in determining crossed pairs, any singlet base pairs are removed; and also any residues whose partner is in the flanking regions not probed by SHAPE has its points downweighted by 0.5.]
+
+The above calculations depend on having structure models for the RNA. Our principle here is to gather potential structure models from a wide variety of sources, including a large range of purely computational algorithms like `knotty`, `hotknots`, and `ipknots`. We also get structures from algorithms that process base pairing probability values from conventional structure prediction methods that do not model pseudoknots (`vienna`,`nupack`,`eternafold`), followed by postprocessing that can model pseudoknots, here `threshknots` or a version of the (unpublished) Hungarian algorithm. These come from the [ARNIE](https://github.com/DasLab/arnie) framework.  We also include models derived form templates in the PDB and PKB; as well as models that are derived based on the SHAPE data themselves (`SHAPEknots`).   All structures are compared to the SHAPE data, and the best fit structure based on highest Eterna Classic Score, as well as any other structure with Eterna Classic Score within 5 points of the best, are used -- their OpenKnot scores are averaged for the final OpenKnot score.
+
+ 
 
 ## Example 
 
 The following example is self-contained and uses files included in this repository. [A very detailed description of how to use the scripts is available in a [Google Doc](https://docs.google.com/document/d/1RsEdkvkpt9Bckj6DkVWhLyOOOxOgo39dwJn4SDmVjQs/edit), but is highly specialized for Stanford users.] 
 
-Make sure to also install the `RDATkit` MATLAB tools – see the repository and instructions here: [https://github.com/ribokit/RDATKit](https://github.com/ribokit/RDATKit).
+Make sure to also install the `RDATkit` MATLAB tools – see the [RDATKit repository](https://github.com/ribokit/RDATKit) and instructions [here](https://ribokit.github.io/RDATKit/).
 
 For this OpenKnotScore repository, use the Set Path command in MATLAB to include the `OpenKnotScore/matlab/` directory and all subdirectories in your MATLAB path.
 
@@ -346,6 +373,36 @@ And here's what one of the top hits that is a synthetic RNA looks like (this RNA
 ![11381957_Pseudoknot-CCUGUUGCAU_IceBolt.png](example/example_output/11381957_Pseudoknot-CCUGUUGCAU_IceBolt.png)
 
 
+## Preparation of template-based structures and SHAPEknots structures (advanced)
 
+The structures above that were derived based on the PDB or PKB were compiled based on a hand-made spreadsheet primarily developed by Eterna player Eli Fisker, with sequence and structure pairs.  An automated script checks across available sequences for (exact!) matches to these pre-complied template sequences, and then derives a structure file.  Here's the command:
+
+```
+%% PKB_P50
+templates_file = 'structure_files/PDB_PKB/PKB_vs_lab_data_50.csv';
+blank_structure = '.....((((((.....))))))......................................................(((((((....))))))).....................';
+[pkb_structures,pkb_idx] = get_structures_based_on_templates( sequences, templates_file,blank_structure,'Sequence','Dot bracket from UTEP','Design ID',ids );
+
+%% PDB_PK50
+templates_file = 'structure_files/PDB_PKB/PDB_vs_lab_data_50.csv';
+blank_structure = '.....((((((.....))))))......................................................(((((((....))))))).....................';
+[pdb_structures,pdb_idx] = get_structures_based_on_templates( sequences, templates_file,blank_structure,'sequence','dot bracket from RNApdbee','lab id',ids );
+output_structures_csv('structure_files/PDB_PKB/PK50_PDB_PKB_structures.csv',{'PDB','PKB'},{pdb_structures,pkb_structures},sequences);
+```
+
+To get SHAPE-derived structures with potential pseudoknots, we can use a wrapper around the SHAPEknots package (itself an executable in RNAstructure). This requires installing the [Biers](https://github.com/ribokit/Biers) repository -- instructions [here](https://ribokit.github.io/Biers/). Because SHAPEknots can take a while to run, it can be important to use MATLAB's parallelization toolbox and `parpool()` functionality. Run:
+
+```
+parpool();
+```
+
+And then here's a code block that works to get all the SHAPEknots structures and output to a `.csv` file.
+
+```
+good_idx = [1:length(sequences)];
+structures_shapeknots(good_idx) = run_shapeknots( sequences, r_norm, good_idx, BLANK_OUT5, BLANK_OUT3 );
+output_structures_csv( 'structure_files/RHEt1_Miseq_TwistPK50_1M7_SHAPEknots_structures.csv','SHAPEknots',structures_shapeknots, sequences )
+``
+In the future, preparation of these structures as well as the structures from all the different algorithms
 
 

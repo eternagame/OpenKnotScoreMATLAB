@@ -62,27 +62,6 @@ if max_count > 0; crossed_pair_quality_score = 100 * (num_crossed_pairs/max_coun
 %fprintf('%s %f\n',structure,crossed_pair_score)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function crossed_res = figure_out_which_bps_are_crossed( bps );
-% figure out which pairs are crossed pairs.
-
-crossed_res = [];
-Nbp = size(bps,1);
-for k = 1:Nbp
-    assert( bps(k,1) < bps(k,2) );
-    for j = (k+1):Nbp        
-        if ( bps(k,1) < bps(j,1) & bps(j,1) < bps(k,2) & bps(k,2) < bps(j,2) ) | ...
-                ( bps(j,1) < bps(k,1) & bps(k,1) < bps(j,2) & bps(j,2) < bps(k,2) )
-            crossed_res = [crossed_res, bps(k,1)];
-            crossed_res = [crossed_res, bps(k,2)];
-            crossed_res = [crossed_res, bps(j,1)];
-            crossed_res = [crossed_res, bps(j,2)];
-        end
-    end
-end
-crossed_res = unique(crossed_res);
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function bps_filtered = remove_bps_with_BLANK_OUT_regions( bps, Nres, BLANK_OUT5, BLANK_OUT3);
 bps_filtered = [];
 Nbp = size(bps,1);
