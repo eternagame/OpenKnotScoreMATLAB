@@ -8,7 +8,8 @@ Thanks to Rachael Kretsch, Grace Nye, Thomas Karagianes, Rui Huang, Jill Townley
 
 ## Principle behind the Score
 
-The OpenKnot score was developed to provide a metric to Eterna Players to aid discovery of pseudoknots in the OpenKnot challenge based on SHAPE data. It goes from 0 to 100, with higher values more likely to be pseudoknots. 
+The OpenKnot score was developed to provide a metric to Eterna Players to aid discovery of pseudoknots in the OpenKnot challenge based on SHAPE data. I
+t goes from 0 to 100, with higher values more likely to be pseudoknots. 
 
 A score above is 80 is estimated to have a pretty good chance for being a pseudoknot. RNA with score below 80 may also form pseudoknots -- its just that the SHAPE data cannot distinguish.
  
@@ -18,19 +19,19 @@ The OpenKnot score is the average of the 'Eterna Classic Score' and the 'Crossed
 OpenKnot score = 1/2 (Eterna Classic Score + Crossed Pair Quality score)
 ```
 
-1. The Eterna Classic score looks at all SHAPE probed positions. If the position is predicted to be paired but has SHAPE reactivity above 0.5, then it is penalized (red symbol below). If the position is predicted to be unnpaired but has SHAPE reactivity below 0.125, then it is penalized (orange symbol below). 
+1. The Eterna Classic score looks at all SHAPE probed positions. If the position is predicted to be paired but has SHAPE reactivity above 0.5, then it is penalized (red symbol below). If the position is predicted to be unpaired but has SHAPE reactivity below 0.125, then it is penalized (orange symbol below). 
 
 ![t5_from_2TPK_visualize_eterna_classic_score.png](example/example_output/t5_from_2TPK_visualize_eterna_classic_score.png)
 
-In this example, there are 69 positions with SHAPE data, and 64 are good, so the Eterna Classic score is 64/69 = 92.8. This type of scoring scheme was developed for Eterna's first paper and archived in this repository. Previously, an extra optimization step was implemented to rescale and offset the data to help maximize ETerna Classic score; this was important for data derived from capillary electrophoresis measurements on each RNA one by one, where those parameters were quite uncertain, but with improved experimental measurements based on, e.g., mutational profiling on lots of sequences at once, that kind of offseting/rescaling is obviated. The SHAPE data is assumed to be normalized so that the 90th percentile value seen in the data set is set to 1.0.
+In this example, there are 69 positions with SHAPE data, and 64 are good, so the Eterna Classic score is 64/69 = 92.8. This type of scoring scheme was developed for Eterna's first paper and archived in this repository. Previously, an extra optimization step was implemented to rescale and offset the data to help maximize Eterna Classic score; this was important for data derived from capillary electrophoresis measurements on each RNA one by one, where those parameters were quite uncertain, but with improved experimental measurements based on, e.g., mutational profiling on lots of sequences at once, that kind of offseting/rescaling is obviated. The SHAPE data is assumed to be normalized so that the 90th percentile value seen in the data set is set to 1.0.
 
-2. The second component of the Open Knot score is the Crossed Pair Quality subscore. This  is the same as the Eterna Classic score, but only computed over residues involved in predicted base pairs that 'cross' other base pairs. Note that these are more than just the `[` and `]` residues in the structure -- these also include the pairs that those pairs cross. Example are the nucleotides marked with symbols below:
+2. The second component of the Open Knot score is the Crossed Pair Quality subscore. This is the same as the Eterna Classic score, but only computed over residues involved in predicted base pairs that 'cross' other base pairs. Note that these are more than just the `[` and `]` residues in the structure -- these also include the pairs that those pairs cross. Example are the nucleotides marked with symbols below:
 
 ![t5_from_2TPK_visualize_crossed_pair_quality_score.png](example/example_output/t5_from_2TPK_visualize_crossed_pair_quality_score.png)
 
 In this example, there are 24 residues involved in crossed pairs, and 22 have SHAPE values under 0.5, which counts as 'good'. So the Crossed Pair Quality score is 22/24 = 91.7. [Minor point for experts: in determining crossed pairs, any singlet base pairs are removed; and also any residues whose partner is in the flanking regions not probed by SHAPE has its points downweighted by 0.5.]
 
-The above calculations depend on having structure models for the RNA. Our principle here is to gather potential structure models from a wide variety of sources, including a large range of purely computational algorithms like `knotty`, `hotknots`, and `ipknots`. We also get structures from algorithms that process base pairing probability values from conventional structure prediction methods that do not model pseudoknots (`vienna`,`nupack`,`eternafold`), followed by postprocessing that can model pseudoknots, here `threshknots` or a version of the (unpublished) Hungarian algorithm. These come from the [ARNIE](https://github.com/DasLab/arnie) framework.  We also include models derived form templates in the PDB and PKB; as well as models that are derived based on the SHAPE data themselves (`SHAPEknots`).   All structures are compared to the SHAPE data, and the best fit structure based on highest Eterna Classic Score, as well as any other structure with Eterna Classic Score within 5 points of the best, are used -- their OpenKnot scores are averaged for the final OpenKnot score.
+The above calculations depend on having structure models for the RNA. Our principle here is to gather potential structure models from a wide variety of sources, including a large range of purely computational algorithms like `knotty`, `hotknots`, and `ipknots`. We also get structures from algorithms that process base pairing probability values from conventional structure prediction methods that do not model pseudoknots (`vienna`,`nupack`,`eternafold`), followed by postprocessing that can model pseudoknots, here `threshknots` or a version of the (unpublished) Hungarian algorithm. These come from the [ARNIE](https://github.com/DasLab/arnie) framework.  We also include models derived from templates in the PDB and PKB; as well as models that are derived based on the SHAPE data themselves (`SHAPEknots`).  All structures are compared to the SHAPE data, and the best fit structure based on highest Eterna Classic Score, as well as any other structure with Eterna Classic Score within 5 points of the best, are used -- their OpenKnot scores are averaged for the final OpenKnot score.
 
  
 
@@ -66,7 +67,7 @@ You can display the file with `show_rdat( r );` Should get an image like:
 
 ![show_rdat.png](example/example_output/show_rdat.png)
 
-We'll also need to extra some data matrices and information on where we don't have data (`BLANK_OUT5`,`BLANK_OUT3`) from this data object:
+We'll also need to extract some data matrices and information on where we don't have data (`BLANK_OUT5`,`BLANK_OUT3`) from this data object:
 
 ```
 [r_norm,sequences,BLANK_OUT5,BLANK_OUT3] = get_r_norm_from_rdat( r );
@@ -172,7 +173,7 @@ This script `calc_openknot_scores` also produces correlation plots of Eterna Cla
 ![anamfija_tower_eternaclassicscore_vs_cc.png](example/example_output/anamfija_tower_eternaclassicscore_vs_cc.png)
 
 
-The two metrics of struture agreement to SHAPE, correlation coeffiecient and ETerna Classic Score, are typically quite similar, but there turn out to be some edge cases where Eterna Classic Score does a more reasonable job at ranking the best structures, which is why we ended up using it as the major way to rank candidate structures for the Open Knot Score.
+The two metrics of structure agreement to SHAPE, correlation coeffiecient and Eterna Classic Score, are typically quite similar, but there turn out to be some edge cases where Eterna Classic Score does a more reasonable job at ranking the best structures, which is why we ended up using it as the major way to rank candidate structures for the Open Knot Score.
 
 Let's take a look at the subscores across all designs...
 ```
@@ -321,7 +322,7 @@ Interestingly (and as might be expected), the model derived from SHAPEknots -- g
 
 Best model for Anamfija_Tower.  OpenKnot: 56.83 Eterna classic: 89.86  Crossed pair score: 19.40  Crossed quality: 23.81 CC: 0.58 
 ```
-At the same time, the SHAPEknots structure is similar in ETernaScore and correlation coefficient to other structures, so after ensembling all structures with Eterna Classic Score within 5, the final OpenKnot score of 56.83 is similar to the value of 57.7 that we got above. Bigger changes can happen if the SHAPEknots or template-derived structure is much better at explaining the SHAPE data than any of the prediction algorithms, although it turns out that this doesn't happen for sequences in the current example data set.
+At the same time, the SHAPEknots structure is similar in EternaScore and correlation coefficient to other structures, so after ensembling all structures with Eterna Classic Score within 5, the final OpenKnot score of 56.83 is similar to the value of 57.7 that we got above. Bigger changes can happen if the SHAPEknots or template-derived structure is much better at explaining the SHAPE data than any of the prediction algorithms, although it turns out that this doesn't happen for sequences in the current example data set.
 
 Again, best to save this output to an RDAT file.
 
