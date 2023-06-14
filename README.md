@@ -8,8 +8,7 @@ Thanks to Rachael Kretsch, Grace Nye, Thomas Karagianes, Rui Huang, Jill Townley
 
 ## Principle behind the Score
 
-The OpenKnot score was developed to provide a metric to Eterna Players to aid discovery of pseudoknots in the OpenKnot challenge based on SHAPE data. I
-t goes from 0 to 100, with higher values more likely to be pseudoknots. 
+The OpenKnot score was developed to provide a metric to Eterna Players to aid discovery of pseudoknots in the OpenKnot challenge based on SHAPE data. It goes from 0 to 100, with higher values more likely to be pseudoknots. 
 
 A score above is 80 is estimated to have a pretty good chance for being a pseudoknot. RNA with score below 80 may also form pseudoknots -- its just that the SHAPE data cannot distinguish.
  
