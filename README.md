@@ -365,7 +365,7 @@ In this case, 10 images are made in the directory `images/`.
 
 Here's what the top hit looks like. The structures are ordered by Eterna Classic Score, and several are within 5 of the top structure (marked with `*`), including the actual `PKB` Pseudobase-derived structure as the very top structure:
 
-![11417294_PKB132 mjt88_mjt.png](example/example_output/11417294_PKB132 mjt88_mjt.png)
+![11417294_PKB132 mjt88_mjt.png](example/example_output/11417294_PKB132%20mjt88_mjt.png)
 
 
 And here's what one of the top hits that is a synthetic RNA looks like (this RNA is not in PKB or PDB, so the corresponding structure lines are specified as all unpaired, and they end up at the bottom of the list), with a best match ot the `ipknots` structure:
