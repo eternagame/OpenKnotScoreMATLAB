@@ -35,7 +35,8 @@ for i = 1:Nconditions
     colormap([0.7 0.7 0.7; redwhiteblue(-1,1)])
     set(gca, 'TickLabelInterpreter','none','fontweight','bold','ticklength',[0.01,0.25],'tickdir','out' );
     if i == 1
-        set(gca,'ytick',[1:length(good_idx)],'yticklabel', headers( good_idx));
+        for n = 1:length(good_idx); header = headers{good_idx(n)}; labels{n} = header(1:min(50,length(header)));end;
+        set(gca,'ytick',[1:length(good_idx)],'yticklabel', labels);
     else
         set(gca,'ytick',[]);
     end
