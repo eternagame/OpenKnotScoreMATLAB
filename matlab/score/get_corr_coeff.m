@@ -15,7 +15,8 @@ function [all_corr_coef, pkg_sort_idx, best_corr_coeff] = get_corr_coeff( r, str
 %  BLANK_OUT5 = gray out this number of 5' residues
 %  BLANK_OUT3 = gray out this number of 3' residues 
 %  corr_type  = correlation coefficient type (default:'Pearson')
-%  num_show   = number of top algorithms to show (default: all)
+%  num_show   = number of top algorithms to show (default: all). If -1,
+%                 don't show  any output
 %  clip       = maximum value to clip at [Default no clipping]
 %
 % Outputs
@@ -43,6 +44,8 @@ end
 
 all_corr_coef( isnan( all_corr_coef) ) = -1;
 [~,pkg_sort_idx] = sort(all_corr_coef,'descend');
+
+if num_show < 0; return; end;
 fprintf('Using correlation type %s',corr_type);
 if clip < Inf; fprintf(' and maximum value (clip) of %8.3f',clip); end;
 fprintf('\n');

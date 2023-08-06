@@ -1,5 +1,5 @@
-function [openknot_info_structs,structures,openknot_scores,eterna_scores,crossed_pair_scores,crossed_pair_quality_scores,cc] = calc_openknot_scores( r_norm, structure_sets, good_idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers);
-% [openknot_info_structs,openknot_scores,eterna_scores,crossed_pair_scores,crossed_pair_quality_scores,structures,cc] = calc_openknot_scores( r_norm, structure_sets, good_idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers);
+function [openknot_info_structs,structures,openknot_scores,eterna_scores,crossed_pair_scores,crossed_pair_quality_scores,best_cc,all_eterna_classic_scores] = calc_openknot_scores( r_norm, structure_sets, good_idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers, make_plot);
+% [openknot_info_structs,structures,openknot_scores,eterna_scores,crossed_pair_scores,crossed_pair_quality_scores,structures,best_cc,all_eterna_classic_scores] = calc_openknot_scores( r_norm, structure_sets, good_idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers, make_plot);
 %
 % Inputs:
 %  r_norm = [Ndesign x Nres] Reactivity matrix, normalized.
@@ -35,17 +35,19 @@ function [openknot_info_structs,structures,openknot_scores,eterna_scores,crossed
 % (C) Rhiju Das, Stanford, HHMI, 2023
 
 if length(good_idx) == 0; good_idx = [1:size(r_norm,1)]';end;
+if ~exist('make_plot','var'); make_plot = 1; end;
 
 openknot_scores = [];
 eterna_scores = [];
 crossed_pair_scores = [];
-cc = [];
+best_cc = [];
 structures = {};
 crossed_pair_quality_scores = [];
 openknot_info_structs = {};
+all_eterna_classic_scores = [];
 
 for idx = good_idx'
-    openknot_info_struct = calc_openknot_score( r_norm, structure_sets, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers );
+    [openknot_info_struct, eterna_classic_scores] = calc_openknot_score( r_norm, structure_sets, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers, make_plot );
 
     openknot_info_structs = [openknot_info_structs, openknot_info_struct];
 
@@ -54,12 +56,12 @@ for idx = good_idx'
     eterna_scores = [eterna_scores, openknot_info_struct.score.eterna_classic_score];
     crossed_pair_scores = [crossed_pair_scores, openknot_info_struct.score.crossed_pair_score];
     crossed_pair_quality_scores = [crossed_pair_quality_scores, openknot_info_struct.score.crossed_pair_quality_score];
-    cc = [cc, openknot_info_struct.score.best_cc];
+    best_cc = [best_cc, openknot_info_struct.score.best_cc];
+
+    all_eterna_classic_scores = [all_eterna_classic_scores; eterna_classic_scores];
 end
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [openknot_info_struct] = calc_openknot_score( r_norm, structure_sets, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers )
+function [openknot_info_struct, eterna_classic_scores] = calc_openknot_score( r_norm, structure_sets, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers, make_plot )
 
 data = r_norm(idx,:,1);
 
@@ -70,7 +72,7 @@ for n = 1:length(mfe_tags)
 end
 structure_map = get_structure_map( structure_sets, idx );
 
-[cc,cc_sort_idx] = get_corr_coeff( r_norm, structure_map, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5);
+[cc,cc_sort_idx] = get_corr_coeff( r_norm, structure_map, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, 'Pearson', (make_plot-1) );
 
 % eterna score classic:
 for n = 1:length(mfe_tags)
@@ -78,10 +80,12 @@ for n = 1:length(mfe_tags)
     eterna_classic_scores(n) = calc_eterna_score_classic( data, pred, BLANK_OUT5, BLANK_OUT3);
     [crossed_pair_scores(n),crossed_pair_quality_scores(n)] = calc_crossed_pair_score(data, structure_sets{n}{idx}, BLANK_OUT5, BLANK_OUT3 );
 end
-plot( cc, eterna_classic_scores,'.')
-xlabel('Correlation coefficient');
-ylabel( 'Eterna score (classic)');
-title(headers{idx},'interp','none');
+if make_plot
+    plot( cc, eterna_classic_scores,'.')
+    xlabel('Correlation coefficient');
+    ylabel( 'Eterna score (classic)');
+    title(headers{idx},'interp','none');
+end
 
 % best_cc = cc(cc_sort_idx(end));
 % best_model_idx = find( best_cc == cc);
@@ -126,7 +130,7 @@ best_struct_eterna_scores = eterna_classic_scores( best_model_idx );
 best_structs = {};
 best_struct_tags = {};
 for n = best_model_idx;
-    fprintf( '%30s %s\n',mfe_tags{n},structure_sets{n}{idx});
+    if make_plot; fprintf( '%30s %s\n',mfe_tags{n},structure_sets{n}{idx}); end;
     best_structs = [best_structs,{structure_sets{n}{idx}}];
     best_struct_tags = [best_struct_tags,{mfe_tags{n}}];
 end
