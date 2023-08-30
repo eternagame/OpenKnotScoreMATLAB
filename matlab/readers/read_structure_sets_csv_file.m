@@ -67,6 +67,7 @@ toc
 
 if sanitize_structures
     tic
+    structure_sets = sanitize_structure_sets(structure_sets, structure_tags);
     for count = 1:length(structure_sets)
         fprintf( 'Sanitizing %d structures for %s...\n',length(structure_sets{count}),structure_tags{count});
         for i = 1:length(structure_sets{count}) % loop over designs

@@ -1,4 +1,4 @@
-function [crossed_pair_score, crossed_pair_quality_score] = calc_crossed_pair_score(data, structure, BLANK_OUT5, BLANK_OUT3 );
+function [crossed_pair_score, crossed_pair_quality_score] = calc_crossed_pair_score(data, structure, BLANK_OUT5, BLANK_OUT3, REMOVE_SINGLETS );
 % calc_crossed_pair_score( data, structure, BLANK_OUT5, BLANK_OUT3);
 %
 % crossed_pair_score = 
@@ -14,9 +14,12 @@ function [crossed_pair_score, crossed_pair_quality_score] = calc_crossed_pair_sc
 %  structure = [Nres] dot-parens notation for structure, with pseudoknots
 %  BLANK_OUT5 = gray out this number of 5' residues
 %  BLANK_OUT3 = gray out this number of 3' residues
+%  REMOVE_SINGLETS = remove singlet base pairs (Default 1) -- note time
+%                      consuming!
 %
 % (C) R. Das, HHMI, Stanford University, 2023
 %
+if ~exist('REMOVE_SINGLETS','var'); REMOVE_SINGLETS = 1; end;
 
 threshold_SHAPE_fixed_pair = 0.25;
 
@@ -28,7 +31,7 @@ if all(structure=='x'); return; end;
 bps = convert_structure_to_bps_v2(structure);
 
 % singlets are throwing things off.
-bps = remove_singlet_bps( bps );
+if REMOVE_SINGLETS; bps = remove_singlet_bps( bps ); end;
 
 crossed_res = figure_out_which_bps_are_crossed( bps );
 
