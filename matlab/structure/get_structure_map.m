@@ -4,8 +4,7 @@ function structure_map = get_structure_map( structure_sets, idx );
 % Inputs
 %  structure_sets = cell of Nsets cells of Nstructures structure strings
 %  idx = [Optional] which structures in a structure_set (cell of strings)
-%               to look at. Rest will be zero-ed in output structure_map
-%               Default: look at all Nstructuers structures.
+%               to look at. 
 %
 % Output
 %  structure_map = [Nstructures x Nres x Nsets] 0/1 for unpaired
@@ -28,7 +27,7 @@ for i = 1:length( structure_sets );
     end
 end
 
-structure_map = zeros(Nstructures,Nres,length(structure_sets));
+structure_map = zeros(length(design_indices),Nres,length(structure_sets));
 for count = 1:length( structure_sets );
     structure_set = structure_sets{count};
     design_indices = 1:length(structure_set);
@@ -43,7 +42,7 @@ for count = 1:length( structure_sets );
     structure_map_for_set(unpaired_pos) = 1;
 
     % move 'em in. 
-    structure_map(design_indices,:,count) = structure_map_for_set';
+    structure_map(:,:,count) = structure_map_for_set';
 
     % old code -- takes longer for lots of structures
     %     for i = design_indices % loop over designs

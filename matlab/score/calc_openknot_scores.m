@@ -70,13 +70,13 @@ for n = 1:length(mfe_tags)
     structure = structure_sets{n}{idx};
     structure_sets{n}{idx} = sanitize_structure( strrep(structure,'x','.'), 1);
 end
-structure_map = get_structure_map( structure_sets, idx );
+structure_map_for_idx = get_structure_map( structure_sets, idx );
 
-[cc,cc_sort_idx] = get_corr_coeff( r_norm, structure_map, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, 'Pearson', (make_plot-1) );
+[cc,cc_sort_idx] = get_corr_coeff( r_norm(idx,:,:), structure_map_for_idx, 1, mfe_tags, BLANK_OUT3, BLANK_OUT5, 'Pearson', (make_plot-1) );
 
 % eterna score classic:
 for n = 1:length(mfe_tags)
-    pred = squeeze(structure_map(idx,:,n));
+    pred = squeeze(structure_map_for_idx(:,:,n));
     eterna_classic_scores(n) = calc_eterna_score_classic( data, pred, BLANK_OUT5, BLANK_OUT3);
     [crossed_pair_scores(n),crossed_pair_quality_scores(n)] = calc_crossed_pair_score(data, structure_sets{n}{idx}, BLANK_OUT5, BLANK_OUT3 );
 end
@@ -135,7 +135,7 @@ for n = best_model_idx;
     best_struct_tags = [best_struct_tags,{mfe_tags{n}}];
 end
 
-fprintf( '\nBest model for %s.  OpenKnot: %5.2f Eterna classic: %5.2f  Crossed pair score: %5.2f  Crossed quality: %5.2f CC: %4.2f \n',...
+fprintf( 'Best model for %s.  OpenKnot: %5.2f Eterna classic: %5.2f  Crossed pair score: %5.2f  Crossed quality: %5.2f CC: %4.2f \n',...
     headers{idx}, openknot_score, ...
     eterna_classic_score,...
     crossed_pair_score, ...

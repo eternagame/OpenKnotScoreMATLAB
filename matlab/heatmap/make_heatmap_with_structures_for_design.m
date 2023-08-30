@@ -33,14 +33,20 @@ tags{1} = ['*',tags{1}];
 labels = [labels,tags(reverse_profile_order)];
 Ndata = size(r_norm,3);
 
+if isempty(structure_map)
+    structure_map_for_idx = get_structure_map( structure_sets, idx);
+else
+    structure_map_for_idx = squeeze(structure_map(idx,:,n))
+end
+
 if isempty(pkg_sort_idx)
     r_norm_for_scoring = r_norm(idx,:,1); % just use first data set
     % r_norm_for_scoring = mean(r_norm(idx,:,:),3)
-    for n = 1:size(structure_map,3);
-        eterna_scores(n) = calc_eterna_score_classic( r_norm_for_scoring, squeeze(structure_map(idx,:,n)), BLANK_OUT5, BLANK_OUT3);
+    for n = 1:size(structure_map_for_idx,3);
+        eterna_scores(n) = calc_eterna_score_classic( r_norm_for_scoring, structure_map_for_idx(:,:,n), BLANK_OUT5, BLANK_OUT3);
     end
     [~,pkg_sort_idx] = sort(eterna_scores);
-    for n = 1:size(structure_map,3);
+    for n = 1:size(structure_map_for_idx,3);
         structure_tags{n} = sprintf( '%s EternaClassic %5.1f', structure_tags{n}, eterna_scores(n) );
     end
 end
@@ -52,7 +58,7 @@ if ~isempty(sortidx); best_structure = structure_sets{ best_fit_idx(sortidx(1)) 
 
 show_structures=repmat({''},1,Ndata);
 for n = pkg_sort_idx(end:-1:1)
-    d = [d; 0.4*structure_map(idx,:,n)];
+    d = [d; 0.4*structure_map_for_idx(:,:,n)];
     show_structures = [show_structures,structure_sets{n}{idx}];
 
     mfe_tag = structure_tags{n};
@@ -99,7 +105,7 @@ end
 
 % Axis labels
 xlabel( 'Position');
-h=title(headers(idx));
+h=title(strsplit(headers{idx},';'));
 set(h,'interpreter','none')
 set(gca,'ytick',[0:size(d,1)],'yticklabels',labels,'xtick',[0:10:N],'xticklabel',[0:10:N]);
 set(gca,'fontweight','bold','TickLabelInterpreter','none','tickdir','out');

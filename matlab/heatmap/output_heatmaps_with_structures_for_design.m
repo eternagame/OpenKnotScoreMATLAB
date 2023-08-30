@@ -14,7 +14,7 @@ function output_heatmaps_with_structures_for_design( image_dir, good_idx, r_norm
 %  headers = cell of Ndesign strings describing each design (titles for
 %  plot). Provide [] to auto-fill from ids,titles,authors.
 %  sequences = cell of sequences for Ndesigns
-%  ids = [Ndesign integers] ids
+%  ids = [Ndesign integers] ids 
 %  titles  = {cell of Ndesign strings} design titles.
 %  authors = {cell of Ndesign strings} authors
 %  BLANK_OUT5 = gray out this number of 5' residues
@@ -39,7 +39,23 @@ end
 for n = 1:length(good_idx)
     idx = good_idx(n);
     make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets, structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags, 0 );
-    image_file = sprintf('%s/%d_%s_%s.png',image_dir,ids(idx),strrep(titles{idx},'/','-'),authors{idx});
+    if ~isnan(ids(idx))
+        image_file = sprintf('%s/%d_%s_%s.png',image_dir,ids(idx),strrep(titles{idx},'/','-'),authors{idx});
+    else
+        image_file = sprintf('%s/%s.png',image_dir,cleanup(headers{idx}));
+    end
     fprintf( 'Making %d of %d: %s ... \n ', n,length(good_idx),image_file );
     print( image_file,'-dpng','-r300' );
 end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function name = cleanup(name);
+name = strip(name,'_');
+name = strrep(name,',','');
+name = strrep(name,'/','_');
+name = strrep(name,' ','_');
+name = strrep(name,'(','');
+name = strrep(name,')','');
+name = strrep(name,sprintf('\t'),' ');
+name = strip(name);
+
