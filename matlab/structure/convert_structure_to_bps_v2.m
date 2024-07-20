@@ -50,7 +50,7 @@ for i = 1:length(structure )
     LEFT_BRACKET = [LEFT_BRACKET, i];
    case right_delim
     if length(LEFT_BRACKET)==0
-        fprintf('Error in matching %s in structure %s\n',left_delim, structure);
+        fprintf('Error in matching %s at position %d in structure %s \n',left_delim, i, structure );
         return;
     end
     bps = [bps; LEFT_BRACKET(end), i];
