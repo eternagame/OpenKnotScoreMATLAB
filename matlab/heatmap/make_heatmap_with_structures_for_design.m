@@ -1,5 +1,5 @@
-function make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets,structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags, create_figure_window );
-% make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets,structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags );
+function make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets,structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, conditions, create_figure_window );
+% make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets,structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, conditions );
 %
 % Inputs
 %  idx = [integer] index of design for which to show heatmap
@@ -9,13 +9,13 @@ function make_heatmap_with_structures_for_design( idx, r_norm, structure_map, st
 %  structure_sets = [Npackages x Ndesign] cell of cell of strings of predicted structures
 %  structure_tags = cell of string, name of each package
 %  pkg_sort_idx = permutation of packages (e.g., [2, 4, 1, 3]) to order
-%             packages
+%             packages (Give empty set [] to order by SHAPE)
 %  headers = cell of Ndesign strings describing each design (titles for
 %  plot)
 %  sequences = cell of sequences for Ndesigns
 %  BLANK_OUT5 = gray out this number of 5' residues
 %  BLANK_OUT3 = gray out this number of 3' residues 
-%  tags = [Nconditions] cell of strings with labels for each of the
+%  conditions = [Nconditions] cell of strings with labels for each of the
 %       experimental conditions in r_norm
 %  create_figure_window = Create new figure window (Default 1). If 0, 
 %                           suppresses the re-focusing of MATLAB to the
@@ -23,20 +23,20 @@ function make_heatmap_with_structures_for_design( idx, r_norm, structure_map, st
 %
 % (C) R. Das, HHMI/Stanford University 2023.
 
-if ~exist('tags','var') tags = {'SHAPE, no Mg2+','SHAPE, +Mg2+'}; end
+if ~exist('conditions','var') conditions = {'SHAPE, no Mg2+','SHAPE, +Mg2+'}; end
 if ~exist('create_figure_window','var') create_figure_window = 1; end
 
 labels = {'sequence'};
 reverse_profile_order = [size(r_norm,3):-1:1];
 d = shiftdim(r_norm(idx,:,reverse_profile_order),1)';
-tags{1} = ['*',tags{1}];
-labels = [labels,tags(reverse_profile_order)];
+conditions{1} = ['*',conditions{1}];
+labels = [labels,conditions(reverse_profile_order)];
 Ndata = size(r_norm,3);
 
 if isempty(structure_map)
     structure_map_for_idx = get_structure_map( structure_sets, idx);
 else
-    structure_map_for_idx = squeeze(structure_map(idx,:,n))
+    structure_map_for_idx = structure_map(idx,:,:);
 end
 
 if isempty(pkg_sort_idx)
@@ -96,7 +96,7 @@ for i = nan_profile_idx'
     rectangle('Position',[0 i-0.5 N+0.5 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
 end
 % gray out G and U for DMS data, since DMS mainly hits A and C?
-for i = find(contains(tags,'DMS'))
+for i = find(contains(conditions,'DMS'))
     gu_idx = union( strfind(sequence,'G'), strfind(sequence,'U') );
     for k = gu_idx
         rectangle('Position',[k-0.5 reverse_profile_order(i)-0.5 1 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
@@ -105,7 +105,7 @@ end
 
 % Axis labels
 xlabel( 'Position');
-h=title(strsplit(headers{idx},';'));
+h=title(strsplit(strrep(headers{idx},sprintf('\t'),' '),';'));
 set(h,'interpreter','none')
 set(gca,'ytick',[0:size(d,1)],'yticklabels',labels,'xtick',[0:10:N],'xticklabel',[0:10:N]);
 set(gca,'fontweight','bold','TickLabelInterpreter','none','tickdir','out');
