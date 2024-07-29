@@ -5,6 +5,8 @@ Developed for the Eterna project's [OpenKnot challenge](https://eternagame.org/c
 
 Thanks to Rachael Kretsch, Grace Nye, Thomas Karagianes, Rui Huang, Jill Townley, Jonathan Romano, and the Eterna developer team for comments, data, and preliminary work.
 
+A Python port into notebooks is available at [OpenKnotScorePipeline](https://github.com/tkaragianes/OpenKnotScorePipeline) and will be the main 'source of truth' going forward.
+
 
 ## Principle behind the Score
 
