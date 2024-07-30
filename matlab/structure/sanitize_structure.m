@@ -15,7 +15,7 @@ if all(structure=='x'); return; end;
 structure = lower(structure);
 structure = strrep(structure,',','');
 
-bps = convert_structure_to_bps_v2( structure);
+bps = convert_structure_to_bps_v3( structure);
 if REMOVE_SINGLETS;    bps = remove_singlet_bps( bps ); end
 
-structure = convert_bps_to_structure_v2( bps, length(structure) );
+structure = convert_bps_to_structure_v3( bps, length(structure) );

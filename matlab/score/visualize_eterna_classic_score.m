@@ -16,7 +16,7 @@ for i = good_idx'
     rprof = r_norm(i,:);
     which_pos = which_pos_general;
     if crossed_pair_only
-        bps = convert_structure_to_bps_v2(structure);
+        bps = convert_structure_to_bps_v3(structure);
         % singlets are throwing things off.
         bps = remove_singlet_bps( bps );
         crossed_res = figure_out_which_bps_are_crossed( bps );
