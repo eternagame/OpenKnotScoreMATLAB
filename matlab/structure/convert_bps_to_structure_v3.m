@@ -1,4 +1,4 @@
-function structure = convert_bps_to_structure3( bps, nres )
+function structure = convert_bps_to_structure3( bps, nres, ORDER_LAYERS_BY_HELIX_LENGTH)
 % structure = convert_bps_to_structure3( bps, nres )
 %
 %  Takes in list of base pairs & structure length and 
@@ -7,6 +7,9 @@ function structure = convert_bps_to_structure3( bps, nres )
 % INPUTS
 %  bps  = [REQUIRED] list of base pairs (i,j) (Nbp X 2 matrix )
 %  nres = [REQUIRED] total number of residues
+%  ORDER_LAYERS_BY_HELIX_LENGTH = When there are pseudoknots prioritize use of (), then [], then {} 
+%            for the set of helices with most pairs (Default 1). If set to
+%            0, use (), [], based on first encounter.
 %
 %  (C) R. Das, Stanford University, 2009-2015, 2017
 %  (C) R. Das, HHMI 2023-24
@@ -37,12 +40,15 @@ for i = 1:length(stems)
     helix_map = [helix_map; stems{i}(1,1), stems{i}(1,2), size( stems{i}, 1 ) ];
 end
 
-% order helices by order of appearance in structure
-[helix_map_sort,idx] = sort(helix_map(:,1));
 
 % order helices by length, longest to shortest
-%[~,idx] = sort( helix_map(:,3) );
-%idx = fliplr( idx' );
+if ORDER_LAYERS_BY_HELIX_LENGTH
+    [~,idx] = sort( helix_map(:,3) );
+    idx = fliplr( idx' );
+else
+    % order helices by order of appearance in structure
+    [helix_map_sort,idx] = sort(helix_map(:,1));
+end
 
 % "layers" are helices that can be connected by (), then by [], then by {},
 % ...
@@ -63,9 +69,9 @@ for n = 1:length( idx )
     end
 end
 
-ORDER_LAYERS_BY_HELIX_LENGTH = 0;
 if ORDER_LAYERS_BY_HELIX_LENGTH
-    % reorder so that helix layers with the most base pairs are first; and after that prioritize order of appearance.
+    % reorder so that helix layers with the most base pairs are first; 
+    %  for ties, prioritize order of appearance in the structure.
     for j = 1:length( helix_layers )
         num_bps(j,:) = [sum( helix_layers{j}(:,3) ),  -helix_layers{j}(1,1) ];
     end

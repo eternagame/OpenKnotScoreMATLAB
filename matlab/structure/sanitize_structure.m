@@ -18,4 +18,4 @@ structure = strrep(structure,',','');
 bps = convert_structure_to_bps_v3( structure);
 if REMOVE_SINGLETS;    bps = remove_singlet_bps( bps ); end
 
-structure = convert_bps_to_structure_v3( bps, length(structure) );
+structure = convert_bps_to_structure_v3( bps, length(structure), 1 );

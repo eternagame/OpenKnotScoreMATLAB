@@ -30,7 +30,7 @@ other_chars = setdiff( structure, ['()[]{}<>.-:_,~',letters,upper(letters)] );
 for n = 1:length( other_chars )
     pos = find( structure == other_chars(n) );
     if mod(length(pos),2) ~= 0
-        warning( sprintf('Non-even number of character %s in structure!? %s\n',other_chars(n),structure ))
+        warning( sprintf('Non-even number of character %s in structure!? %s',other_chars(n),structure ))
         continue;
     end
     assert( mod(length(pos),2) == 0 );
@@ -58,7 +58,7 @@ for i = 1:length(structure )
             [bps,errorcode] =  get_bps( structure, bps_input, right_delim, left_delim );
         end
         if errorcode 
-            fprintf('Error in matching %s at position %d in structure %s \n',left_delim, i, structure );
+            warning(sprintf('Error in matching %s at position %d in structure %s',right_delim, i, structure ));
         end
         return;
     end
