@@ -1,5 +1,5 @@
-# OpenKnotScore
-Scripts and examples for scoring pseudoknot designs based on chemical mapping data.
+# OpenKnotScoreMATLAB
+Original scripts and examples (MATLAB) for scoring pseudoknot designs based on chemical mapping data.
 
 Developed for the Eterna project's [OpenKnot challenge](https://eternagame.org/challenges/11843006) by R. Das.
 
@@ -42,7 +42,7 @@ The following example is self-contained and uses files included in this reposito
 
 Make sure to also install the `RDATkit` MATLAB tools – see the [RDATKit repository](https://github.com/ribokit/RDATKit) and instructions [here](https://ribokit.github.io/RDATKit/).
 
-For this OpenKnotScore repository, use the Set Path command in MATLAB to include the `OpenKnotScore/matlab/` directory and all subdirectories in your MATLAB path.
+For this OpenKnotScore repository, use the Set Path command in MATLAB to include the `OpenKnotScoreMATLAB/matlab/` directory and all subdirectories in your MATLAB path.
 
 Then let's go into the example directory: 
 
