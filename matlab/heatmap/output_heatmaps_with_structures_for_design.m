@@ -26,7 +26,7 @@ function output_heatmaps_with_structures_for_design( image_dir, good_idx, r_norm
 % 
 if ~exist(image_dir,'dir') mkdir( image_dir ); end;
 if ~exist('tags','var') tags = {'SHAPE, no Mg2+','SHAPE, +Mg2+'}; end
-set(figure(5),'position',[100 500 1200 100+12*length(structure_sets)]);
+set(figure(5),'position',[100 500 1200 150+12*length(structure_sets)]);
 set(gcf,'color','white')
 clf
 
@@ -39,7 +39,7 @@ end
 for n = 1:length(good_idx)
     idx = good_idx(n);
     make_heatmap_with_structures_for_design( idx, r_norm, structure_map, structure_sets, structure_tags, pkg_sort_idx, headers, sequences, BLANK_OUT5, BLANK_OUT3, tags, 0 );
-    if ~isnan(ids(idx))
+    if ~isempty(ids) & ~isnan(ids(idx))
         image_file = sprintf('%s/%d_%s_%s.png',image_dir,ids(idx),strrep(titles{idx},'/','-'),authors{idx});
     else
         image_file = sprintf('%s/%s.png',image_dir,cleanup(headers{idx}));
