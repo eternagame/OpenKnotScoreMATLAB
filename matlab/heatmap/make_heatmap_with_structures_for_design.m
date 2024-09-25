@@ -96,9 +96,16 @@ for i = nan_profile_idx'
     rectangle('Position',[0 i-0.5 N+0.5 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
 end
 % gray out G and U for DMS data, since DMS mainly hits A and C?
-for i = find(contains(conditions,'DMS'))
+for i = find(contains(conditions,'DMS') & ~contains(conditions,'DMS_N7'))
     gu_idx = union( strfind(sequence,'G'), strfind(sequence,'U') );
     for k = gu_idx
+        rectangle('Position',[k-0.5 reverse_profile_order(i)-0.5 1 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
+    end
+end
+% gray out A, C, and U for DMS_N7
+for i = find(contains(conditions,'DMS_N7'))
+    acu_idx = find(sequence=='A' | sequence=='C' | sequence == 'U');
+    for k = acu_idx
         rectangle('Position',[k-0.5 reverse_profile_order(i)-0.5 1 1],'EdgeColor','none','FaceColor',[0.7 0.7 0.7]);
     end
 end

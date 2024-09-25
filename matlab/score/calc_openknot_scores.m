@@ -72,7 +72,6 @@ end
 function [openknot_info_struct, eterna_classic_scores] = calc_openknot_score( r_norm, structure_sets, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers, make_plot, REMOVE_SINGLETS )
 
 data = r_norm(idx,:,1);
-
 for n = 1:length(mfe_tags)
     structure = structure_sets{n}{idx};
     structure = strrep(structure,'x','.');
