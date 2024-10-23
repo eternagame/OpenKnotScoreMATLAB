@@ -238,7 +238,7 @@ For final use outside MATLAB and sharing and publication, it's good to stow away
 
 ```
 rdat_with_scores = r;
-filename_with_scores = strrep(rdat_file, '.rdat','_WITH_SCORES_FROM_PK50-17Apr23.rdat');
+filename_with_scores = replace(rdat_file, {'data_sets', '.rdat'}, {'example_output', '_WITH_SCORES_FROM_PK50-17Apr23.rdat'});
 rdat_with_scores.comments = [r.comments,{'OpenKnot score is 0.5 x Eterna-classic-score + 0.5 x Crossed-pair-quality-score, averaged over structures with Eterna score within 5 of best.'}];
 for i = 1:length(openknot_info_twist)
    rdat_with_scores.data_annotations{i} = [rdat_with_scores.data_annotations{i}, convert_struct_to_annotations( openknot_info_twist{i}, 'Eterna' )];
