@@ -1,4 +1,4 @@
-function structure = convert_bps_to_structure3( bps, nres, ORDER_LAYERS_BY_HELIX_LENGTH)
+function [structure, helix_map] = convert_bps_to_structure3( bps, nres, ORDER_LAYERS_BY_HELIX_LENGTH)
 % structure = convert_bps_to_structure3( bps, nres )
 %
 %  Takes in list of base pairs & structure length and 
@@ -14,8 +14,9 @@ function structure = convert_bps_to_structure3( bps, nres, ORDER_LAYERS_BY_HELIX
 %  (C) R. Das, Stanford University, 2009-2015, 2017
 %  (C) R. Das, HHMI 2023-24
 %
-
 if ( nargin < 2 ) help( mfilename ); return; end;
+if ~exist( "ORDER_LAYERS_BY_HELIX_LENGTH", 'var'); ORDER_LAYERS_BY_HELIX_LENGTH = 1; end;
+
 if length( bps ) > 0 & size( bps, 2 ) ~= 2
     fprintf( 'bps must be Nbps x 2 array\n' );
     return;
