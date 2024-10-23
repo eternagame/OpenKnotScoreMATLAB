@@ -197,13 +197,21 @@ histogram(openknot_scores_twist,[0:5:100]); xlabel('OpenKnot Score')
 
 This histogram shows the population with OpenKnot score >80.
 
-We can use the OpenKnot score to sort the sequences and see which ones look the best, e.g. the top 10:
+We can use the OpenKnot score to sort the sequences and see which ones look the best, e.g. the top 10. We first need to get some information on the designs like the ids:
+
+```
+ids = str2num(char(get_tag(r,'Eterna:id')));
+titles = get_tag(r,'Eterna:design_name');
+authors = get_tag(r,'Eterna:author');
+```
+
+and then let's show those for the top 10 designs:
 
 ```
 openknot_scores = openknot_scores_twist;
 [~,sort_idx] = sort(openknot_scores,'descend');
 fprintf('\n\n');
-for n = sort_idx(1:10);
+for n = sort_idx(1:10)';
    fprintf( 'OpenKnot:%5.2f Et:%6.1f CP:%6.1f CP-q:%6.1f %4d %8d %35s %20s %s\n', openknot_scores(n),eterna_scores_twist(n), crossed_pair_scores_twist(n), crossed_pair_quality_scores_twist(n), n, ids(n), titles{n}, authors{n},structures_twist{n} );
 end
 ```
@@ -356,14 +364,14 @@ good_idx = sort_idx(1:10);
 And now let's make the output:
 
 ```
-image_dir = 'images/';
+image_dir = 'openknotscore_images';
 conditions = {'RHEt1_TwistPK50_1M7_Miseq'};
 structure_map_extended = get_structure_map( structure_sets_extended );
 output_heatmaps_with_structures_for_design( image_dir, good_idx, r_norm, structure_map_extended, structure_sets_extended, structure_tags_extended, [], design_names, sequences, ids, titles, authors, BLANK_OUT5, BLANK_OUT3, conditions);
 
 ```
 
-In this case, 10 images are made in the directory `images/`. 
+In this case, 10 images are made in the directory `openknotscore_images/`. 
 
 Here's what the top hit looks like. The structures are ordered by Eterna Classic Score, and several are within 5 of the top structure (marked with `*`), including the actual `PKB` Pseudobase-derived structure as the very top structure:
 
@@ -377,7 +385,7 @@ And here's what one of the top hits that is a synthetic RNA looks like (this RNA
 
 ## Preparation of template-based structures and SHAPEknots structures (advanced)
 
-The structures above that were derived based on the PDB or PKB were compiled based on a hand-made spreadsheet primarily developed by Eterna player Eli Fisker, with sequence and structure pairs.  An automated script checks across available sequences for (exact!) matches to these pre-complied template sequences, and then derives a structure file.  Here's the command:
+The structures above that were derived based on the PDB or PKB were compiled based on a hand-made spreadsheet primarily developed by Eterna player Eli Fisker, with sequence and structure pairs.  An automated script checks across available sequences for (exact!) matches to these pre-compiled template sequences, and then derives a structure file.  Here's the command:
 
 ```
 %% PKB_P50
@@ -404,7 +412,7 @@ And then here's a code block that works to get all the SHAPEknots structures and
 good_idx = [1:length(sequences)];
 structures_shapeknots(good_idx) = run_shapeknots( sequences, r_norm, good_idx, BLANK_OUT5, BLANK_OUT3 );
 output_structures_csv( 'structure_files/RHEt1_Miseq_TwistPK50_1M7_SHAPEknots_structures.csv','SHAPEknots',structures_shapeknots, sequences )
-``
+```
 In the future, preparation of these structures as well as the structures from all the different algorithms
 
 

@@ -44,7 +44,7 @@ for n = 1:length(good_idx)
     else
         image_file = sprintf('%s/%s.png',image_dir,cleanup(headers{idx}));
     end
-    fprintf( 'Making %d of %d: %s ... \n ', n,length(good_idx),image_file );
+    fprintf( 'Making %d of %d: %s ... \n ', n,length(good_idx),image_file );    
     print( image_file,'-dpng','-r300' );
 end
 

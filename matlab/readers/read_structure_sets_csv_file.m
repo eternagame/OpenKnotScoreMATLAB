@@ -95,20 +95,19 @@ if exist('ordered_sequences','var') & length( ordered_sequences ) > 0
     end
     structure_sets = {}; 
     for n = 1:length(structure_tags); structure_sets{n} = blank_sequences; end
-    reorder = [];
     % need to use map/dictionary for speed.
     d = containers.Map(sequences,[1:length(sequences)]);
+    idx = [];
     for i = 1:length(ordered_sequences)
-        if d.isKey( ordered_sequences{i} )
-            reorder( d(ordered_sequences{i}) ) = i;
-        end
+        if( ~d.isKey( ordered_sequences{i} ) ); continue; end;
+        found_structure_idx = [found_structure_idx,i];
+        idx = [idx, d(ordered_sequences{i})];
     end
     for n = 1:length(structure_sets)
-        structure_sets{n}(reorder) = structure_sets_from_csv{n};
+        structure_sets{n} = structure_sets_from_csv{n}(idx);
     end
     fprintf( 'Matched %d csv sequences into %d out of %d ordered sequences\n',...
-        length(structure_sets_from_csv{1}),length(reorder),length(ordered_sequences));
-    found_structure_idx = sort(reorder);
+        length(structure_sets_from_csv{1}),length(idx),length(ordered_sequences));
     toc
 end
 tic
