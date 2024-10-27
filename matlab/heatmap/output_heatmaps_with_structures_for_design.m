@@ -10,7 +10,8 @@ function output_heatmaps_with_structures_for_design( image_dir, good_idx, r_norm
 %  structure_sets = [Npackages x Ndesign] cell of cell of strings of predicted structures
 %  structure_tags = cell of string, name of each package
 %  pkg_sort_idx = permutation of packages (e.g., [2, 4, 1, 3]) to order
-%             packages
+%             packages. Give [] to sort by Eterna score to first r_norm dataset.
+%              Give -1 to instead output Eterna score of each r_norm dataset.
 %  headers = cell of Ndesign strings describing each design (titles for
 %  plot). Provide [] to auto-fill from ids,titles,authors.
 %  sequences = cell of sequences for Ndesigns

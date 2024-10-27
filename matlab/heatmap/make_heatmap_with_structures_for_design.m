@@ -9,7 +9,8 @@ function make_heatmap_with_structures_for_design( idx, r_norm, structure_map, st
 %  structure_sets = [Npackages x Ndesign] cell of cell of strings of predicted structures
 %  structure_tags = cell of string, name of each package
 %  pkg_sort_idx = permutation of packages (e.g., [2, 4, 1, 3]) to order
-%             packages (Give empty set [] to order by SHAPE)
+%             packages. Give [] to sort by Eterna score to first r_norm dataset.
+%              Give -1 to instead output Eterna score of each r_norm dataset.
 %  headers = cell of Ndesign strings describing each design (titles for
 %  plot)
 %  sequences = cell of sequences for Ndesigns
@@ -29,8 +30,6 @@ if ~exist('create_figure_window','var') create_figure_window = 1; end
 labels = {'sequence'};
 reverse_profile_order = [size(r_norm,3):-1:1];
 d = shiftdim(r_norm(idx,:,reverse_profile_order),1)';
-conditions{1} = ['*',conditions{1}];
-labels = [labels,conditions(reverse_profile_order)];
 Ndata = size(r_norm,3);
 
 if isempty(structure_map)
@@ -39,17 +38,33 @@ else
     structure_map_for_idx = structure_map(idx,:,:);
 end
 
+% adjust BLANK_OUT5, BLANK_OUT3 if there are 'X''s in sequence.
+sequence = sequences{idx};
+goodpos = find(sequence ~= 'X' & sequence ~= 'N');
+BLANK_OUT5_FOR_SCORE = max( min(goodpos)-1, BLANK_OUT5 );
+BLANK_OUT3_FOR_SCORE = max( length(sequence) - max(goodpos), BLANK_OUT3 );
+
 if isempty(pkg_sort_idx)
+    conditions{1} = ['*',conditions{1}];
     r_norm_for_scoring = r_norm(idx,:,1); % just use first data set
     % r_norm_for_scoring = mean(r_norm(idx,:,:),3)
     for n = 1:size(structure_map_for_idx,3);
-        eterna_scores(n) = calc_eterna_score_classic( r_norm_for_scoring, structure_map_for_idx(:,:,n), BLANK_OUT5, BLANK_OUT3);
+        eterna_scores(n) = calc_eterna_score_classic( r_norm_for_scoring, structure_map_for_idx(:,:,n), BLANK_OUT5_FOR_SCORE, BLANK_OUT3_FOR_SCORE);
     end
     [~,pkg_sort_idx] = sort(eterna_scores);
     for n = 1:size(structure_map_for_idx,3);
         structure_tags{n} = sprintf( '%s EternaClassic %5.1f', structure_tags{n}, eterna_scores(n) );
     end
+elseif pkg_sort_idx == -1
+    for n = 1:size(r_norm,3)
+        r_norm_for_scoring = r_norm(idx,:,n);
+        eterna_scores(n) = calc_eterna_score_classic( r_norm_for_scoring, structure_map_for_idx(:,:,1), BLANK_OUT5_FOR_SCORE, BLANK_OUT3_FOR_SCORE);
+        conditions{n} = sprintf( '%s EternaClassic %5.1f', conditions{n}, eterna_scores(n) );
+    end
+    pkg_sort_idx = [1:size(structure_map_for_idx,3)];
 end
+
+labels = [labels,conditions(reverse_profile_order)];
 
 best_structure = '';
 best_fit_idx = find( contains( structure_tags, 'best_fit' ) );
@@ -80,7 +95,6 @@ for i = 1:length(show_structures)
     end
 end
 
-sequence = sequences{idx};
 for n = 1:length(sequence)
     text(n,0,sequence(n),'interpreter','none','HorizontalAlignment','center','VerticalAlignment','middle','fontsize',8);
 end
@@ -119,7 +133,6 @@ set(gca,'fontweight','bold','TickLabelInterpreter','none','tickdir','out');
 box off
 ylim([-1 size(d,1)+0.5])
 xlim([0.5 size(d,2)+0.5]);
-%pause;
 
 h=colorbar();
 colorTitleHandle = get(h,'Title');
