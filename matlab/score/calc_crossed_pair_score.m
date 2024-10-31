@@ -43,7 +43,7 @@ num_crossed_pairs  = 0;
 total_cross_res = 0;
 max_count = 0;
 for i = crossed_res
-    if i < BLANK_OUT5; continue; end;
+    if i <= BLANK_OUT5; continue; end;
     if i > length(data)-BLANK_OUT3; continue; end;
     max_count = max_count + 1;
     if data( i ) < threshold_SHAPE_fixed_pair
