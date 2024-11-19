@@ -2,7 +2,7 @@ function [x,structure_tags, structure_sets,structure_map,found_structure_idx] = 
 % [x,structure_tags, structure_sets,structure_map,found_structure_idx] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences, sanitize_structures );
 %
 % Inputs
-%  structure_sets_csv_file = csv file with columns like "_mfe" holding
+%  structure_sets_csv_file = csv file with columns like "_PRED" holding
 %                        structure predictions from different packages in dot bracket notation.
 %  ordered_sequences = [Optional] list of sequences. If provided, structures read
 %          in from .csv file will be reordered based on sequence column to match ordering in
@@ -40,25 +40,10 @@ for q = 1:length(structure_sets_csv_files)
     for n = 1:length(x.Properties.VariableNames);
         tag = x.Properties.VariableNames{n};
         structures = table2cell(x(:,n));
-        if contains(tag,'eternafold_threshknot_'); continue; end;
-        if contains(tag,'sequence'); continue; end;
-        if strcmp(tag,'id'); continue; end;
-        is_structure_col = 1;
-        for i = 1:size(x,1)
-            if strcmp(structures{i},'ERR'); structures{i}=repmat('.',1,length(structures{1})); end;
-            if ~ischar(structures{i}) | (~contains(structures{i},'.') & ~contains(structures{i},'(') & ~contains(structures{i},'x') )
-                is_structure_col = 0;
-                break;
-            end
-        end
-        if ~is_structure_col; continue; end;
-        structure_tag = strip(strrep(strrep(tag,'__mfe',''),'_mfe',''),'_');
-        idx = find((strcmp(structure_tags,structure_tag)));
-        if isempty( idx )
-            structure_tags = [structure_tags,{structure_tag}];
-            idx = length(structure_tags);
-            structure_sets{idx} = {};
-        end
+        if ~endsWith(tag,'_PRED'); continue; end;
+        structure_tags = [structure_tags,{tag}];
+        idx = length(structure_tags);
+        structure_sets{idx} = {};
         structure_sets{idx} = [structure_sets{idx};structures];
     end
 end
