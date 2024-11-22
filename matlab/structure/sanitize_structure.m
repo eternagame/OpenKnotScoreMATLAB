@@ -11,7 +11,10 @@ function structure = sanitize_structure( structure, REMOVE_SINGLETS )
 % Requires Biers to be installed.
 % (C) R. Das, Stanford, HHMI, 2023
 if ~exist('REMOVE_SINGLETS','var') REMOVE_SINGLETS = 0; end;
-if all(structure=='x'); return; end;
+if all(structure=='x')
+    structure = '';
+    return
+end
 structure = strrep(structure,',','');
 
 bps = convert_structure_to_bps_v3( structure);
