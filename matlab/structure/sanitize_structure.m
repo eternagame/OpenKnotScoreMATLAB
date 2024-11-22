@@ -15,7 +15,6 @@ if all(structure=='x')
     structure = '';
     return
 end
-structure = lower(structure);
 structure = strrep(structure,',','');
 
 bps = convert_structure_to_bps_v3( structure);
