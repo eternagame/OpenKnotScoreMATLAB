@@ -1,5 +1,5 @@
-function [x,structure_tags, structure_sets,structure_map,found_structure_idx] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences, sanitize_structures )
-% [x,structure_tags, structure_sets,structure_map,found_structure_idx] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences, sanitize_structures );
+function [x,structure_tags, structure_sets,structure_map,found_structure_idx] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences, sanitize_structures, legacy_tags )
+% [x,structure_tags, structure_sets,structure_map,found_structure_idx] = read_structure_sets_csv_file( structure_sets_csv_file, ordered_sequences, sanitize_structures, legacy_tags );
 %
 % Inputs
 %  structure_sets_csv_file = csv file with columns like "_PRED" holding
@@ -8,6 +8,8 @@ function [x,structure_tags, structure_sets,structure_map,found_structure_idx] = 
 %          in from .csv file will be reordered based on sequence column to match ordering in
 %          ordered_sequence
 %  sanitize_structures = sanitize dot-bracket structure (Default 1)
+%  legacy_tags = Use original heuristic method of determining which columns are structure columns
+%          (Default 0)
 %
 % Outputs
 % x = csv file in MATLAB Table object
@@ -20,6 +22,7 @@ function [x,structure_tags, structure_sets,structure_map,found_structure_idx] = 
 % (C) R. Das, HHMI/Stanford University 2023.
 warning('off');
 if ~exist('sanitize_structures','var') sanitize_structures = 1; end;
+if ~exist('legacy_tags','var') legacy_tags = 0; end;
 tic
 structure_tags = {}; structure_sets = {}; sequences = {};
 if iscell( structure_sets_csv_file )
@@ -40,11 +43,36 @@ for q = 1:length(structure_sets_csv_files)
     for n = 1:length(x.Properties.VariableNames);
         tag = x.Properties.VariableNames{n};
         structures = table2cell(x(:,n));
-        if ~endsWith(tag,'_PRED'); continue; end;
-        structure_tags = [structure_tags,{tag}];
-        idx = length(structure_tags);
-        structure_sets{idx} = {};
+        if legacy_tags
+            if contains(tag,'eternafold_threshknot_'); continue; end;
+            if contains(tag,'sequence'); continue; end;
+            if strcmp(tag,'id'); continue; end;
+            is_structure_col = 1;
+            for i = 1:size(x,1)
+                if strcmp(structures{i},'ERR'); structures{i}=repmat('.',1,length(structures{1})); end;
+                if ~ischar(structures{i}) | (~contains(structures{i},'.') & ~contains(structures{i},'(') & ~contains(structures{i},'x') )
+                    is_structure_col = 0;
+                    break;
+                end
+            end
+            if ~is_structure_col; continue; end;
+            structure_tag = strip(strrep(strrep(tag,'__mfe',''),'_mfe',''),'_');
+            idx = find((strcmp(structure_tags,structure_tag)));
+            if isempty( idx )
+                structure_tags = [structure_tags,{structure_tag}];
+                idx = length(structure_tags);
+                structure_sets{idx} = {};
+            end
+        else
+            if ~endsWith(tag,'_PRED'); continue; end;
+            structure_tags = [structure_tags,{tag}];
+            idx = length(structure_tags);
+            structure_sets{idx} = {};
+        end
         structure_sets{idx} = [structure_sets{idx};structures];
+    end
+    if length(structure_tags) == 0 & ~legacy_tags
+        fprintf('WARNING: No structure columns found in %s. Structure column names in the provided CSV should either end in "_PRED" or you may want to set legacy_tags = 1\n', structure_sets_csv_file);
     end
 end
 fprintf('\n');
