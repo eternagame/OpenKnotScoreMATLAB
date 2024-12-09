@@ -397,7 +397,7 @@ blank_structure = '.....((((((.....)))))).......................................
 templates_file = 'structure_files/PDB_PKB/PDB_vs_lab_data_50.csv';
 blank_structure = '.....((((((.....))))))......................................................(((((((....))))))).....................';
 [pdb_structures,pdb_idx] = get_structures_based_on_templates( sequences, templates_file,blank_structure,'sequence','dot bracket from RNApdbee','lab id',ids );
-output_structures_csv('structure_files/PDB_PKB/PK50_PDB_PKB_structures.csv',{'PDB','PKB'},{pdb_structures,pkb_structures},sequences);
+output_structures_csv('structure_files/PDB_PKB/PK50_PDB_PKB_structures.csv',{'PDB_PRED','PKB_PRED'},{pdb_structures,pkb_structures},sequences);
 ```
 
 To get SHAPE-derived structures with potential pseudoknots, we can use a wrapper around the SHAPEknots package (itself an executable in RNAstructure). This requires installing the [Biers](https://github.com/ribokit/Biers) repository -- instructions [here](https://ribokit.github.io/Biers/). Because SHAPEknots can take a while to run, it can be important to use MATLAB's parallelization toolbox and `parpool()` functionality. Run:
@@ -411,7 +411,7 @@ And then here's a code block that works to get all the SHAPEknots structures and
 ```
 good_idx = [1:length(sequences)];
 structures_shapeknots(good_idx) = run_shapeknots( sequences, r_norm, good_idx, BLANK_OUT5, BLANK_OUT3 );
-output_structures_csv( 'structure_files/RHEt1_Miseq_TwistPK50_1M7_SHAPEknots_structures.csv','SHAPEknots',structures_shapeknots, sequences )
+output_structures_csv( 'structure_files/RHEt1_Miseq_TwistPK50_1M7_SHAPEknots_structures.csv','SHAPEknots_PRED',structures_shapeknots, sequences )
 ```
 In the future, preparation of these structures as well as the structures from all the different algorithms
 
