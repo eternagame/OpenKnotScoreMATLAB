@@ -72,11 +72,10 @@ end
 function [openknot_info_struct, eterna_classic_scores] = calc_openknot_score( r_norm, structure_sets, idx, mfe_tags, BLANK_OUT3, BLANK_OUT5, headers, make_plot, REMOVE_SINGLETS )
 
 data = r_norm(idx,:,1);
-for n = 1:length(mfe_tags)
-    structure = structure_sets{n}{idx};
-    structure = strrep(structure,'x','.');
-    if REMOVE_SINGLETS; structure_sets{n}{idx} = sanitize_structure( structure, 1); end;
-    structure_sets{n}{idx} = structure;
+if REMOVE_SINGLETS
+    for n = 1:length(mfe_tags)
+        structure_sets{n}{idx} = sanitize_structure( structure_sets{n}{idx}, 1);
+    end
 end
 structure_map_for_idx = get_structure_map( structure_sets, idx );
 
@@ -84,6 +83,7 @@ structure_map_for_idx = get_structure_map( structure_sets, idx );
 
 % eterna score classic:
 for n = 1:length(mfe_tags)
+    if isempty(structure_sets{n}{idx}); continue; end;
     pred = squeeze(structure_map_for_idx(:,:,n));
     eterna_classic_scores(n) = calc_eterna_score_classic( data, pred, BLANK_OUT5, BLANK_OUT3);
     [crossed_pair_scores(n),crossed_pair_quality_scores(n)] = calc_crossed_pair_score(data, structure_sets{n}{idx}, BLANK_OUT5, BLANK_OUT3, REMOVE_SINGLETS);
